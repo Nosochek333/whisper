@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostChat - Главная</title>
+    <style>
+        :root {
+            --bg-color: #1a0526;
+            --sidebar-color: #2a0d3a;
+            --accent-color: #7b2cbf;
+            --text-color: #f8f9fa;
+            --hover-color: #3a0d5a;
+            --message-in: #2a0d3a;
+            --message-out: #3a0d5a;
+            --gradient: linear-gradient(135deg, #1a0526 0%, #2a0d3a 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--gradient);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 70px;
+            background-color: var(--sidebar-color);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .sidebar-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .sidebar-item i {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .sidebar-item span {
+            white-space: nowrap;
+            font-size: 16px;
+            display: none;
+        }
+
+        .sidebar:hover .sidebar-item span {
+            display: inline;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Chats list */
+        .chats-list {
+            width: 300px;
+            background-color: var(--sidebar-color);
+            border-right: 1px solid var(--bg-color);
+            overflow-y: auto;
+        }
+
+        .chat-container {
+            display: flex;
+            height: 100%;
+        }
+
+        .chat-item {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid var(--bg-color);
+            transition: background-color 0.2s;
+        }
+
+        .chat-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .chat-item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            margin-right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .chat-item-info {
+            flex: 1;
+        }
+
+        .chat-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .chat-item-last-message {
+            font-size: 14px;
+            color: #aaa;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Search bar */
+        .search-bar {
+            padding: 15px;
+            background-color: var(--sidebar-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        /* Chat area */
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--bg-color);
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .incoming {
+            background-color: var(--message-in);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .outgoing {
+            background-color: var(--message-out);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #aaa;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 15px;
+            background-color: var(--sidebar-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .input-area button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .input-area button:hover {
+            background-color: #9d4edd;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--sidebar-color);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--accent-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .modal-body button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .modal-body button:hover {
+            background-color: #9d4edd;
+        }
+
+        /* Promo code section */
+        .promo-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border-radius: 10px;
+        }
+
+        .promo-section h3 {
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .promo-input {
+            display: flex;
+        }
+
+        .promo-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px 0 0 10px;
+            border: none;
+            background-color: #3a0d5a;
+            color: var(--text-color);
+        }
+
+        .promo-input button {
+            padding: 10px 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+        }
+
+        /* Balance */
+        .balance {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: var(--bg-color);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .balance i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
+        /* Icons (using Unicode as placeholder) */
+        .icon {
+            font-style: normal;
+            font-family: 'Segoe UI Emoji';
+        }
+
+        /* Auth button */
+        .auth-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth button -->
+    <button class="auth-button" id="auth-button">Войти</button>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-item" onclick="openModal('profile-modal')">
+            <i class="icon">👤</i>
+            <span>Профиль</span>
+        </div>
+        <div class="sidebar-item" onclick="openModal('group-modal')">
+            <i class="icon">👥</i>
+            <span>Создать группу</span>
+        </div>
+        <div class="sidebar-item" onclick="openModal('channel-modal')">
+            <i class="icon">📢</i>
+            <span>Создать канал</span>
+        </div>
+        <div class="sidebar-item" onclick="openModal('promo-modal')">
+            <i class="icon">🎁</i>
+            <span>Промокоды</span>
+        </div>
+        <div class="sidebar-item" onclick="window.location.href='settings.html'">
+            <i class="icon">⚙️</i>
+            <span>Настройки</span>
+        </div>
+    </div>
+
+    <!-- Chat container -->
+    <div class="chat-container">
+        <!-- Chats list -->
+        <div class="chats-list" id="chats-list">
+            <div class="search-bar">
+                <input type="text" placeholder="Поиск..." id="chat-search">
+            </div>
+            <div id="chats-container"></div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <!-- Chat area -->
+            <div class="chat-area" id="chat-area">
+                <div class="message incoming">
+                    <div class="message-sender">GhostUser123</div>
+                    <div class="message-text">Привет! Как дела?</div>
+                    <div class="message-time">12:34</div>
+                </div>
+                <div class="message outgoing">
+                    <div class="message-text">Привет! Всё отлично, спасибо!</div>
+                    <div class="message-time">12:35</div>
+                </div>
+                <div class="message incoming">
+                    <div class="message-sender">GhostUser123</div>
+                    <div class="message-text">Попробуй ввести промокод TEST для получения 1 Goust!</div>
+                    <div class="message-time">12:36</div>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="input-area">
+                <input type="text" placeholder="Введите сообщение..." id="message-input">
+                <button onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Мой профиль</h2>
+                <button class="close-modal" onclick="closeModal('profile-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div id="profile-avatar" style="width: 100px; height: 100px; background-color: var(--accent-color); border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 40px;">👻</div>
+                    <h3 id="profile-username">GhostUser</h3>
+                    <div class="balance">
+                        <i>💰</i>
+                        <span id="profile-balance">Баланс: 0 Goust</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Modal -->
+    <div class="modal" id="group-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Создать группу</h2>
+                <button class="close-modal" onclick="closeModal('group-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" placeholder="Название группы" id="group-name">
+                <button onclick="createGroup()">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Channel Modal -->
+    <div class="modal" id="channel-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Создать канал</h2>
+                <button class="close-modal" onclick="closeModal('channel-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" placeholder="Название канала" id="channel-name">
+                <input type="text" placeholder="Описание канала" id="channel-desc">
+                <button onclick="createChannel()">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promo Modal -->
+    <div class="modal" id="promo-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Промокоды</h2>
+                <button class="close-modal" onclick="closeModal('promo-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="promo-section">
+                    <h3>Активировать промокод</h3>
+                    <div class="promo-input">
+                        <input type="text" placeholder="Введите промокод" id="promo-code">
+                        <button onclick="activatePromo()">Применить</button>
+                    </div>
+                </div>
+                <div id="promo-result" style="margin-top: 15px; text-align: center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Авторизация</h2>
+                <button class="close-modal" onclick="closeModal('auth-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <button onclick="window.location.href='register.html'" style="width: 100%; padding: 12px; margin-bottom: 15px; background-color: var(--accent-color); color: white; border: none; border-radius: 10px; cursor: pointer;">Регистрация</button>
+                <p style="text-align: center; margin: 15px 0;">или</p>
+                <input type="text" placeholder="Ваш ID" id="login-id">
+                <button onclick="login()" style="width: 100%; padding: 12px; background-color: var(--accent-color); color: white; border: none; border-radius: 10px; cursor: pointer;">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data
+        if (!localStorage.getItem('ghostChatData')) {
+            const initialData = {
+                users: {},
+                chats: [],
+                currentUser: null,
+                themes: {
+                    'default': {
+                        bgColor: '#1a0526',
+                        sidebarColor: '#2a0d3a',
+                        accentColor: '#7b2cbf',
+                        gradient: 'linear-gradient(135deg, #1a0526 0%, #2a0d3a 100%)'
+                    },
+                    'purple-gradient': {
+                        bgColor: '#1a0526',
+                        sidebarColor: '#2a0d3a',
+                        accentColor: '#9d4edd',
+                        gradient: 'linear-gradient(135deg, #3a0d5a 0%, #7b2cbf 100%)'
+                    },
+                    'deep-space': {
+                        bgColor: '#0f0521',
+                        sidebarColor: '#1a0d33',
+                        accentColor: '#5a189a',
+                        gradient: 'linear-gradient(135deg, #0f0521 0%, #240046 100%)'
+                    }
+                },
+                currentTheme: 'default'
+            };
+            localStorage.setItem('ghostChatData', JSON.stringify(initialData));
+        }
+
+        const ghostChatData = JSON.parse(localStorage.getItem('ghostChatData'));
+
+        // Apply theme
+        function applyTheme(themeName) {
+            const theme = ghostChatData.themes[themeName];
+            document.documentElement.style.setProperty('--bg-color', theme.bgColor);
+            document.documentElement.style.setProperty('--sidebar-color', theme.sidebarColor);
+            document.documentElement.style.setProperty('--accent-color', theme.accentColor);
+            document.documentElement.style.setProperty('--gradient', theme.gradient);
+            ghostChatData.currentTheme = themeName;
+            localStorage.setItem('ghostChatData', JSON.stringify(ghostChatData));
+        }
+
+        // Check if user is logged in
+        function checkAuth() {
+            if (ghostChatData.currentUser) {
+                const user = ghostChatData.users[ghostChatData.currentUser];
+                document.getElementById('auth-button').textContent = user.username;
+                document.getElementById('profile-username').textContent = user.username;
+                document.getElementById('profile-balance').textContent = `Баланс: ${user.balance || 0} Goust`;
+                document.getElementById('profile-avatar').textContent = user.avatar || '👤';
+                loadChats();
+            } else {
+                document.getElementById('auth-button').textContent = 'Войти';
+            }
+        }
+
+        // Modal functions
+        function openModal(id) {
+            if (id === 'profile-modal' && !ghostChatData.currentUser) {
+                openModal('auth-modal');
+                return;
+            }
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Promo code activation
+        function activatePromo() {
+            if (!ghostChatData.currentUser) {
+                openModal('auth-modal');
+                return;
+            }
+
+            const promoCode = document.getElementById('promo-code').value;
+            const resultElement = document.getElementById('promo-result');
+            
+            if (promoCode.toUpperCase() === 'TEST') {
+                const user = ghostChatData.users[ghostChatData.currentUser];
+                user.balance = (user.balance || 0) + 1;
+                localStorage.setItem('ghostChatData', JSON.stringify(ghostChatData));
+                resultElement.innerHTML = '<p style="color: #4CAF50;">Промокод активирован! Вы получили 1 Goust!</p>';
+                document.getElementById('profile-balance').textContent = `Баланс: ${user.balance} Goust`;
+                document.getElementById('promo-code').value = '';
+            } else {
+                resultElement.innerHTML = '<p style="color: #F44336;">Неверный промокод</p>';
+            }
+        }
+
+        // Message sending
+        function sendMessage() {
+            if (!ghostChatData.currentUser) {
+                openModal('auth-modal');
+                return;
+            }
+
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatArea = document.getElementById('chat-area');
+                const newMessage = document.createElement('div');
+                newMessage.className = 'message outgoing';
+                newMessage.innerHTML = `
+                    <div class="message-text">${message}</div>
+                    <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                `;
+                chatArea.appendChild(newMessage);
+                input.value = '';
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+
+        // Allow sending message with Enter key
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Create group
+        function createGroup() {
+            if (!ghostChatData.currentUser) {
+                openModal('auth-modal');
+                return;
+            }
+
+            const groupName = document.getElementById('group-name').value.trim();
+            if (groupName) {
+                const newGroup = {
+                    id: Date.now().toString(),
+                    name: groupName,
+                    type: 'group',
+                    avatar: '👥',
+                    lastMessage: 'Группа создана',
+                    lastMessageTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                };
+                ghostChatData.chats.push(newGroup);
+                localStorage.setItem('ghostChatData', JSON.stringify(ghostChatData));
+                closeModal('group-modal');
+                document.getElementById('group-name').value = '';
+                loadChats();
+            }
+        }
+
+        // Create channel
+        function createChannel() {
+            if (!ghostChatData.currentUser) {
+                openModal('auth-modal');
+                return;
+            }
+
+            const channelName = document.getElementById('channel-name').value.trim();
+            const channelDesc = document.getElementById('channel-desc').value.trim();
+            if (channelName) {
+                const newChannel = {
+                    id: Date.now().toString(),
+                    name: channelName,
+                    description: channelDesc,
+                    type: 'channel',
+                    avatar: '📢',
+                    lastMessage: 'Канал создан',
+                    lastMessageTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                };
+                ghostChatData.chats.push(newChannel);
+                localStorage.setItem('ghostChatData', JSON.stringify(ghostChatData));
+                closeModal('channel-modal');
+                document.getElementById('channel-name').value = '';
+                document.getElementById('channel-desc').value = '';
+                loadChats();
+            }
+        }
+
+        // Load chats
+        function loadChats() {
+            const chatsContainer = document.getElementById('chats-container');
+            chatsContainer.innerHTML = '';
+
+            ghostChatData.chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.innerHTML = `
+                    <div class="chat-item-avatar">${chat.avatar}</div>
+                    <div class="chat-item-info">
+                        <div class="chat-item-name">${chat.name}</div>
+                        <div class="chat-item-last-message">${chat.lastMessage}</div>
+                    </div>
+                `;
+                chatsContainer.appendChild(chatItem);
+            });
+        }
+
+        // Login
+        function login() {
+            const userId = document.getElementById('login-id').value.trim();
+            if (userId && ghostChatData.users[userId]) {
+                ghostChatData.currentUser = userId;
+                localStorage.setItem('ghostChatData', JSON.stringify(ghostChatData));
+                closeModal('auth-modal');
+                checkAuth();
+            } else {
+                alert('Пользователь не найден');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('auth-button').addEventListener('click', function() {
+            if (ghostChatData.currentUser) {
+                openModal('profile-modal');
+            } else {
+                openModal('auth-modal');
+            }
+        });
+
+        // Initialize
+        applyTheme(ghostChatData.currentTheme);
+        checkAuth();
+    </script>
+</body>
+</html>
